@@ -34,4 +34,25 @@ public class TodoListTests
         Assert.Single(found);
         Assert.Equal("Buy milk", found[0].Title);
     }
+
+    [Fact]
+    public void SaveAndLoad_PersistsData()
+    {
+        var list = new TodoList();
+        list.Add("Task 1");
+        list.Add("Task 2");
+
+        var tempFile = Path.GetTempFileName();
+        try
+        {
+            list.Save(tempFile);
+            var loaded = TodoList.Load(tempFile);
+            Assert.Equal(2, loaded.Count);
+            Assert.Contains(loaded.Items, i => i.Title == "Task 1");
+        }
+        finally
+        {
+            File.Delete(tempFile);
+        }
+    }
 }

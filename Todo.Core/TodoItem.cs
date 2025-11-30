@@ -1,26 +1,27 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
 namespace Todo.Core;
 
 public class TodoItem
 {
-    [JsonInclude]
-    public Guid Id { get; } = Guid.NewGuid();
-
-    [JsonInclude]
+    public Guid Id { get; }
     public string Title { get; private set; }
+    public bool IsDone { get; private set; }
 
-    [JsonInclude]
-    public bool IsDone { get; private set; }    
-
+    // Основной конструктор — для ручного создания
     public TodoItem(string title)
     {
+        Id = Guid.NewGuid();
         Title = title?.Trim() ?? throw new ArgumentNullException(nameof(title));
+    }
+
+    // Конструктор для десериализации JSON
+    [JsonConstructor]
+    public TodoItem(Guid id, string title, bool isDone)
+    {
+        Id = id;
+        Title = title ?? throw new ArgumentNullException(nameof(title));
+        IsDone = isDone;
     }
 
     public void MarkDone() => IsDone = true;

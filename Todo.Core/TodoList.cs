@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Todo.Core;
 
@@ -26,7 +26,11 @@ public class TodoList
 
     public void Save(string path)
     {
-        var options = new JsonSerializerOptions { WriteIndented = true };
+        var options = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            IncludeFields = true
+        };
         File.WriteAllText(path, JsonSerializer.Serialize(_items, options));
     }
 
@@ -44,7 +48,10 @@ public class TodoList
         var items = JsonSerializer.Deserialize<List<TodoItem>>(File.ReadAllText(path), options);
         if (items != null)
         {
-            list._items.AddRange(items);
+            foreach (var item in items)
+            {
+                list._items.Add(item);
+            }
         }
 
         return list;

@@ -1,6 +1,7 @@
 ﻿using Xunit;
 using Todo.Core;
 using System.Linq;
+using System.IO;
 
 namespace Todo.Core.Tests;
 
@@ -54,5 +55,47 @@ public class TodoListTests
         {
             File.Delete(tempFile);
         }
+    }
+
+    [Fact]
+    public void SaveAndLoad_PersistsAllData()
+    {
+        // Arrange
+        var originalList = new TodoList();
+        var task1 = originalList.Add("Buy milk");
+        task1.MarkDone();
+        originalList.Add("Read book");
+
+        var tempFile = Path.GetTempFileName();
+
+        try
+        {
+            // Act
+            originalList.Save(tempFile);
+            var loadedList = TodoList.Load(tempFile);
+
+            // Assert
+            Assert.Equal(2, loadedList.Count);
+
+            var loadedTasks = loadedList.Items.ToList();
+            Assert.Equal("Buy milk", loadedTasks[0].Title);
+            Assert.True(loadedTasks[0].IsDone);
+            Assert.Equal("Read book", loadedTasks[1].Title);
+            Assert.False(loadedTasks[1].IsDone);
+
+            Assert.Equal(task1.Id, loadedTasks[0].Id);
+        }
+        finally
+        {
+            if (File.Exists(tempFile))
+                File.Delete(tempFile);
+        }
+    }
+
+    [Fact]
+    public void Load_NonExistentFile_ReturnsEmptyList()
+    {
+        var list = TodoList.Load("nonexistent-file.json");
+        Assert.Empty(list.Items);
     }
 }
